@@ -1,0 +1,61 @@
+name: host-deps
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: host-deps-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deps:
+    name: deps (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu
+            image: ubuntu:24.04
+          - name: debian
+            image: debian:bookworm
+          - name: fedora
+            image: fedora:latest
+          - name: arch
+            image: archlinux:latest
+    container:
+      image: ${{ matrix.image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install host deps
+        run: |
+          set -eu
+          ./scripts/install-deps.sh -y --with-go --with-shares
+
+      - name: Verify CLI tools
+        run: |
+          set -eu
+          command -v curl
+          command -v python3
+          command -v tar
+          command -v truncate
+          command -v mkfs.ext4
+          command -v ip
+          command -v nft
+          command -v dnsmasq
+          command -v firecracker
+          command -v go
+          command -v exportfs
+          firecracker --version
+          go version
+
+      - name: Dry-run still works
+        run: ./scripts/install-deps.sh --dry-run -y

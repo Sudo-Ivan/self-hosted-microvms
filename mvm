@@ -13,6 +13,7 @@ usage() {
 	cat <<'EOF'
 Usage:
   ./mvm doctor
+  ./mvm deps [--with-go] [--with-shares] [--skip-firecracker]
   ./mvm setup
   ./mvm profiles
   ./mvm up <name> <template> [--profile name] [--share host:guest] [--mem N]
@@ -45,6 +46,8 @@ Usage:
   ./mvm argus apply|status|queries|watch|drops|dns-update|flush
 
 Examples:
+  curl -fsSL https://raw.githubusercontent.com/Sudo-Ivan/self-hosted-microvms/master/install.sh | sh
+  ./mvm deps --with-go
   ./mvm up navi navidrome --profile media --share /home/user/Music:/data/navidrome/music:ro
   ./mvm templates --tag=media
   ./mvm info navidrome
@@ -61,6 +64,7 @@ EOF
 
 case "${CMD}" in
 doctor) exec "${SCRIPTS}/doctor.sh" "$@" ;;
+deps|install-deps) exec "${SCRIPTS}/install-deps.sh" "$@" ;;
 setup) exec "${SCRIPTS}/setup.sh" "$@" ;;
 profiles) exec "${SCRIPTS}/profiles.sh" "$@" ;;
 up) exec "${SCRIPTS}/up.sh" "$@" ;;

@@ -20,13 +20,33 @@ Each service gets its own lightweight VM, private network interface, and persist
 - Root for TAP networking and firewall policy
 - Go optional, only to build the secrets CLI
 
+## Install
+
+One-liner (clones to ~/self-hosted-microvms, installs host packages, fetches Firecracker, runs setup when KVM is ready):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Sudo-Ivan/self-hosted-microvms/master/install.sh | sh
+```
+
+Or from a checkout:
+
+```bash
+git clone https://github.com/Sudo-Ivan/self-hosted-microvms.git
+cd self-hosted-microvms
+sudo ./mvm deps
+# optional: sudo ./mvm deps --with-go --with-shares
+cp -n config.example.env config.env
+./mvm setup
+```
+
+Supported package families: Ubuntu/Debian, Fedora/RHEL-like, Arch.
+
 ## Quick start
 
 ```bash
-cp config.example.env config.env
-./mvm doctor
-sudo ./mvm sudoers install
-./mvm up navi navidrome --profile media --share /home/user1/Music:/data/navidrome/music:ro
+./mvm templates
+./mvm info navidrome
+sudo ./mvm up navi navidrome --profile media --share /home/user1/Music:/data/navidrome/music:ro
 ./mvm health navi
 ```
 
@@ -34,11 +54,21 @@ That up command runs setup if needed, creates the instance, starts it with root,
 
 First boot installs packages inside the guest and can take a few minutes.
 
+Handy template browse:
+
+```bash
+./mvm templates --tag=media
+./mvm templates --tag=debug
+./mvm info alpine-shell
+sudo ./mvm up demo alpine-shell
+```
+
 ## Common commands
 
 | Command | Purpose |
 | --- | --- |
 | ./mvm doctor | Check host prerequisites |
+| ./mvm deps | Install host packages and Firecracker |
 | ./mvm setup | Fetch kernel and build base rootfs |
 | ./mvm profiles | List resource profiles |
 | ./mvm up name template | Create if needed, start, wait healthy |

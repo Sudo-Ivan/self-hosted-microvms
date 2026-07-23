@@ -202,6 +202,7 @@ Never commit live credentials from `/data` volumes or generated admin passwords.
 ## Quick command map
 
 - doctor/setup: host readiness and shared assets
+- deps: install host packages and Firecracker
 - up/create/start/stop/restart/destroy: instance lifecycle
 - templates/info/validate/template new|sync: template UX
 - resize: mem/vcpu/disk growth
