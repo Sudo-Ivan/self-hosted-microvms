@@ -98,6 +98,10 @@ if [ -z "${NAME}" ] || [ -z "${TEMPLATE}" ]; then
 	die "usage: $0 <name> <template> [--profile name] [--share path:path] [--mem N]"
 fi
 
+if [ -z "${PROFILE}" ] && [ -n "${DEFAULT_PROFILE:-}" ]; then
+	PROFILE="${DEFAULT_PROFILE}"
+fi
+
 info "checking host"
 if [ "${_UP_NEED_SHARE_DOCTOR}" = "1" ]; then
 	"${SCRIPTS_DIR}/doctor.sh" --shares || true

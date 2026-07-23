@@ -35,13 +35,6 @@ argus_load_global_policy() {
 		set +a
 	fi
 
-	# Compatibility with older Odin policy keys if someone still has them.
-	ARGUS_ENABLED="${ARGUS_ENABLED:-${ODIN_ENABLED:-1}}"
-	ARGUS_DEFAULT_EGRESS="${ARGUS_DEFAULT_EGRESS:-${ODIN_DEFAULT_EGRESS:-allow}}"
-	ARGUS_INTER_VM="${ARGUS_INTER_VM:-${ODIN_INTER_VM:-deny}}"
-	ARGUS_LOG_DROPS="${ARGUS_LOG_DROPS:-${ODIN_LOG_DROPS:-1}}"
-	ARGUS_ALLOW_GATEWAY="${ARGUS_ALLOW_GATEWAY:-${ODIN_ALLOW_GATEWAY:-1}}"
-
 	argus_dns_defaults
 
 	case "${ARGUS_DEFAULT_EGRESS}" in
@@ -128,11 +121,6 @@ argus_parse_portspec() {
 			;;
 		esac
 	fi
-}
-
-argus_csv_foreach() {
-	# $1=csv $2=callback name (unused, inline in caller)
-	:
 }
 
 argus_join_file() {
@@ -520,19 +508,4 @@ argus_flush() {
 	nft delete table inet odin 2>/dev/null || true
 	rm -f "${SHARED_DIR}/argus.nft" "${SHARED_DIR}/odin.nft"
 	echo "argus table removed"
-}
-
-argus_name_for_ip() {
-	_an_want="$1"
-	_an_name=
-	_an_ip=
-	_an_tap=
-	_an_ports=
-	argus_foreach_instance | while IFS='	' read -r _an_name _an_ip _an_tap _an_ports; do
-		if [ "${_an_ip}" = "${_an_want}" ]; then
-			printf '%s\n' "${_an_name}"
-			exit 0
-		fi
-	done
-	printf '%s\n' "${_an_want}"
 }

@@ -12,6 +12,14 @@ guestfs_mount_rootfs() {
 	mount -o loop,rw "${ROOTFS_PATH}" "${GUESTFS_MNT}"
 }
 
+guestfs_mount_data() {
+	# Mount DATA_PATH read-write. Sets GUESTFS_MNT. Caller must guestfs_umount.
+	guestfs_require_root
+	[ -f "${DATA_PATH}" ] || die "missing data: ${DATA_PATH}"
+	GUESTFS_MNT="$(mktemp -d "${INSTANCE_DIR}/data-mnt.XXXXXX")"
+	mount -o loop,rw "${DATA_PATH}" "${GUESTFS_MNT}"
+}
+
 guestfs_umount() {
 	if [ -n "${GUESTFS_MNT:-}" ] && [ -d "${GUESTFS_MNT}" ]; then
 		sync

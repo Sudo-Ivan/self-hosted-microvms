@@ -30,6 +30,7 @@ Notes:
   - mem and vcpu apply on next boot (use --restart to bounce now)
   - data/rootfs only grow (never shrink) and require a stopped guest
   - Firecracker machine config is rebuilt on start from config.env
+  - to copy an instance use ./mvm clone <src> <dst> (not shrink)
 EOF
 }
 

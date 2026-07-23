@@ -78,6 +78,8 @@ sudo ./mvm up demo alpine-shell
 | ./mvm template new name | Scaffold a new service template |
 | ./mvm template sync name | Copy latest template into a rootfs |
 | ./mvm create name template | Create an instance only |
+| ./mvm clone src dst | Copy a stopped instance (new IP/TAP) |
+| ./mvm rename old new | Rename a stopped instance (keeps IP) |
 | ./mvm start name | Start instance, apply Argus and networking |
 | ./mvm stop name | Stop instance and remove its TAP |
 | ./mvm restart name | Stop then start |
@@ -88,10 +90,12 @@ sudo ./mvm up demo alpine-shell
 | ./mvm logs name | Follow serial output |
 | ./mvm update name | Upgrade guest packages (backs up first) |
 | ./mvm rollback name | Restore latest backup |
-| ./mvm backup name | Snapshot data and config |
+| ./mvm backup name | Data + config backup (add --full for rootfs) |
+| ./mvm snapshot name | Full VM snapshot (rootfs + data) |
 | ./mvm restore name | Restore a backup stamp |
 | ./mvm watchdog | Restart unhealthy guests |
-| ./mvm tls name --domain host | Emit Caddy or nginx TLS snippets |
+| ./mvm publish name --domain host | Publish via host snippets or --via proxy VM |
+| ./mvm tls name --domain host | Alias for publish (host snippets) |
 | ./mvm update --base | Rebuild shared base rootfs |
 | ./mvm update --kernel | Fetch a newer guest kernel |
 | ./mvm destroy name | Delete instance disks and config |
@@ -108,7 +112,7 @@ sudo ./mvm up demo alpine-shell
 | ./mvm argus dns-update | Refresh remote DNS blocklists |
 | ./mvm argus flush | Remove Argus nftables table and DNS |
 
-doas or sudo is required for start and stop with default TAP networking. Install passwordless access with doas ./mvm doas install or sudo ./mvm sudoers install. If both helpers exist, set MVM_ROOT_CMD to pick one.
+doas or sudo is required for start and stop with default TAP networking. Install passwordless access with doas ./mvm doas install or sudo ./mvm sudoers install. After that, ./mvm start|stop|argus auto-elevates so you do not need to type sudo each time. If both helpers exist, set MVM_ROOT_CMD to pick one.
 
 Every start refreshes Argus when ARGUS_ENABLED=1.
 
@@ -139,7 +143,18 @@ sudo ./mvm sudoers remove
 doas ./mvm doas remove
 ```
 
-sudoers writes /etc/sudoers.d/mvm. doas appends a managed block to /etc/doas.conf. Both install a /usr/local/sbin/mvm wrapper (needed when the repo path has spaces).
+sudoers writes /etc/sudoers.d/mvm. doas appends a managed block to /etc/doas.conf. Both install a /usr/local/sbin/mvm wrapper (needed when the repo path has spaces). After install, ./mvm start and ./mvm stop re-exec as root automatically.
+
+## Clone and rename
+
+```bash
+./mvm stop navi
+./mvm clone navi navi2
+./mvm start navi2
+./mvm rename navi2 music
+```
+
+clone copies rootfs and data with a new guest IP and TAP. Secrets are not copied. rename keeps the guest IP and CID, retargets the TAP name and paths.
 
 ## Resize an instance
 
@@ -148,7 +163,7 @@ sudoers writes /etc/sudoers.d/mvm. doas appends a managed block to /etc/doas.con
 ./mvm resize navi --data-mib 8192 --restart
 ```
 
-Memory and vCPU apply on next boot. Data and rootfs images only grow (never shrink) and need a stopped guest unless you pass --restart.
+Memory and vCPU apply on next boot. Data and rootfs images only grow (never shrink) and need a stopped guest unless you pass --restart. To copy rather than shrink, use ./mvm clone.
 
 ## Autostart (systemd, openrc, runit, dinit)
 
@@ -169,17 +184,19 @@ sudo ./mvm service install dinit
 sudo ./mvm service enable navi openrc
 ```
 
-## Backups, update, rollback
+## Backups, snapshot, update, rollback
 
 ```bash
 ./mvm backup navi
+./mvm backup navi --full
+./mvm snapshot navi before-upgrade
 ./mvm backup list navi
 ./mvm update navi
 ./mvm rollback navi
 ./mvm restore navi 20260722T120000Z
 ```
 
-update takes a pre-update snapshot of data and rootfs. If health fails after update, run rollback.
+backup defaults to data + config. snapshot (or backup --full) also copies rootfs for whole-VM time travel. update takes a pre-update snapshot of data and rootfs. If health fails after update, run rollback.
 
 ## Watchdog
 
@@ -190,16 +207,19 @@ sudo ./mvm watchdog
 
 Restarts a guest after WATCHDOG_FAILURES consecutive health failures (config.env).
 
-## TLS helper
+## Publish / TLS helper
 
-Print or write host reverse-proxy snippets aimed at the instance port:
+Publish an app on a domain via host snippets or a Caddy/nginx microVM:
 
 ```bash
-./mvm tls navi --domain music.example.com
-./mvm tls navi --domain music.example.com --emit caddy --write
+./mvm publish navi --domain music.example.com
+./mvm publish navi --domain music.example.com --emit caddy --write
+./mvm publish app --domain git.example.com --via edge --restart-via
 ```
 
-Writes under instances/name/tls/ when --write is set.
+--write stores host snippets under instances/name/tls/. --via mounts the proxy guest data volume and writes a site drop-in, then can restart that proxy. ./mvm tls remains a compatibility alias.
+
+Worked proxy to app to database recipe: [docs/stacks/proxy-app-db.md](docs/stacks/proxy-app-db.md).
 
 ## Networking
 
@@ -274,6 +294,8 @@ Example tight setup:
 3. Let web reach vault and forgejo with ALLOW_PEERS=vault,forgejo
 4. Keep databases with empty egress and no peers
 5. Keep ARGUS_DNS_FORCE=1 so lookups hit the blocklists
+
+Full proxy to app to database walkthrough: [docs/stacks/proxy-app-db.md](docs/stacks/proxy-app-db.md).
 
 Commands:
 

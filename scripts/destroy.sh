@@ -19,6 +19,9 @@ validate_name "${NAME}"
 DIR="$(instance_dir "${NAME}")"
 [ -d "${DIR}" ] || die "instance not found: ${NAME}"
 
+# Elevate early so confirmation + Argus cleanup run as root once.
+ensure_root "$@"
+
 if [ "${YES}" != "--yes" ]; then
 	echo "This deletes ${DIR} including rootfs and data volumes."
 	printf "Type the instance name to confirm: "
@@ -34,7 +37,7 @@ rm -rf "${DIR}"
 # shellcheck source=../argus/lib.sh
 . "${REPO_ROOT}/argus/lib.sh"
 argus_load_global_policy
-if [ "${ARGUS_ENABLED}" = "1" ] && [ "$(id -u)" -eq 0 ] && command -v nft >/dev/null 2>&1; then
+if [ "${ARGUS_ENABLED}" = "1" ] && command -v nft >/dev/null 2>&1; then
 	argus_apply >/dev/null || true
 fi
 

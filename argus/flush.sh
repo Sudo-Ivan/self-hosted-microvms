@@ -13,4 +13,5 @@ set -eu
 # shellcheck source=lib.sh
 . "${REPO_ROOT}/argus/lib.sh"
 load_config
+ensure_root "$@"
 argus_flush

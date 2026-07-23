@@ -33,6 +33,9 @@ USER_PORT_FORWARDS="${PORT_FORWARDS:-}"
 USER_TAP_DEV="${TAP_DEV:-}"
 USER_HOST_SHARES="${HOST_SHARES:-}"
 USER_PROFILE="${PROFILE:-}"
+if [ -z "${USER_PROFILE}" ] && [ -n "${DEFAULT_PROFILE:-}" ]; then
+	USER_PROFILE="${DEFAULT_PROFILE}"
+fi
 
 # shellcheck source=../lib/profiles.sh
 . "${LIB_DIR}/profiles.sh"

@@ -13,6 +13,9 @@ set -eu
 . "${LIB_DIR}/network.sh"
 load_config
 
+# Elevate early so TAP teardown and Argus refresh always run.
+ensure_root "$@"
+
 stop_one() {
 	name="$1"
 	load_instance "${name}"

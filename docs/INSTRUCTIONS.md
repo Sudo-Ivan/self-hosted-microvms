@@ -240,13 +240,15 @@ Typical app plus database layout:
 4. Apply:
 
 ```bash
-sudo ./mvm argus apply
-sudo ./mvm argus status
-sudo ./mvm argus watch
-sudo ./mvm argus drops
+./mvm argus apply
+./mvm argus status
+./mvm argus watch
+./mvm argus drops
 ```
 
-Start and stop refresh Argus when it is enabled. After you edit a `firewall.env` or blocklist, run `sudo ./mvm argus apply` or `sudo ./mvm argus dns-update`.
+Full proxy to app to database recipe (Caddy + Forgejo + Postgres, including `./mvm publish --via`): see [stacks/proxy-app-db.md](stacks/proxy-app-db.md).
+
+Start and stop refresh Argus when it is enabled. After you edit a `firewall.env` or blocklist, run `./mvm argus apply` or `./mvm argus dns-update`.
 
 ## 10. Where data and secrets live
 
@@ -382,7 +384,7 @@ Shared download helpers are available at `/opt/template/_common/download.sh` ins
 ./mvm resize myvault --data-mib 8192 --restart
 ```
 
-Memory and vCPU apply on next boot. Disk images only grow and need a stopped guest unless `--restart` is set.
+Memory and vCPU apply on next boot. Disk images only grow and need a stopped guest unless `--restart` is set. To copy an instance use `./mvm clone <src> <dst>`. For whole-VM rollback use `./mvm snapshot` then `./mvm restore`.
 
 ## 12. Maintenance tips
 

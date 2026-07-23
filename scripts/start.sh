@@ -24,7 +24,7 @@ require_cmd "${FIRECRACKER_BIN}"
 [ -f "${DATA_PATH}" ] || die "missing data volume: ${DATA_PATH}"
 
 if is_running "${PID_FILE}"; then
-	die "instance already running (pid $(cat "${PID_FILE}")). stop with: $(root_helper 2>/dev/null || echo sudo) ./mvm stop ${NAME}"
+	die "instance already running (pid $(cat "${PID_FILE}")). stop with: ./mvm stop ${NAME}"
 fi
 
 DETACH="${DETACH:-1}"
@@ -32,7 +32,7 @@ SETUP_NET="${SETUP_NET:-1}"
 TAP_FOR_VM="${TAP_DEV}"
 
 if [ "${SETUP_NET}" = "1" ]; then
-	[ "$(id -u)" -eq 0 ] || die "start needs root for networking ($(root_helper 2>/dev/null || echo sudo) ./mvm start ${NAME})"
+	ensure_root "$@"
 	setup_tap "${TAP_DEV}"
 	# shellcheck source=../argus/lib.sh
 	. "${REPO_ROOT}/argus/lib.sh"

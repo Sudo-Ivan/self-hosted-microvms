@@ -10,11 +10,16 @@ backup_dirs_for() {
 backup_create() {
 	name="$1"
 	label="${2:-manual}"
+	full="${3:-0}"
 	load_instance "${name}"
 	dir="$(backup_dirs_for "${name}")"
 	stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 	dest="${dir}/${stamp}"
 	mkdir -p "${dest}"
+
+	if [ "${full}" = "1" ] || [ "${BACKUP_ROOTFS:-0}" = "1" ]; then
+		full=1
+	fi
 
 	info "backing up ${name} to ${dest}"
 	cp -a "${INSTANCE_DIR}/config.env" "${dest}/config.env"
@@ -22,9 +27,11 @@ backup_create() {
 		cp -a "${INSTANCE_DIR}/firewall.env" "${dest}/firewall.env"
 	fi
 	cp -a "${DATA_PATH}" "${dest}/data.ext4"
-	# Rootfs is large and usually recoverable from template. Opt in with BACKUP_ROOTFS=1.
-	if [ "${BACKUP_ROOTFS:-0}" = "1" ]; then
+	if [ "${full}" = "1" ]; then
 		cp -a "${ROOTFS_PATH}" "${dest}/rootfs.ext4"
+		printf 'full\n' >"${dest}/kind"
+	else
+		printf 'data\n' >"${dest}/kind"
 	fi
 	printf '%s\n' "${label}" >"${dest}/label"
 	printf '%s\n' "${stamp}" >"${dest}/stamp"
@@ -40,24 +47,40 @@ backup_list() {
 			echo "(no backups for ${name})"
 			return 0
 		}
-		printf '%-14s %-20s %-10s %s\n' "INSTANCE" "STAMP" "SIZE" "LABEL"
+		printf '%-14s %-20s %-6s %-10s %s\n' "INSTANCE" "STAMP" "KIND" "SIZE" "LABEL"
 		for stamp in "${dir}"/20*; do
 			[ -d "${stamp}" ] || continue
 			label="$(cat "${stamp}/label" 2>/dev/null || echo manual)"
+			kind="$(cat "${stamp}/kind" 2>/dev/null || true)"
+			if [ -z "${kind}" ]; then
+				if [ -f "${stamp}/rootfs.ext4" ]; then
+					kind=full
+				else
+					kind=data
+				fi
+			fi
 			size="$(du -sh "${stamp}" 2>/dev/null | awk '{print $1}')"
-			printf '%-14s %-20s %-10s %s\n' "${name}" "$(basename "${stamp}")" "${size}" "${label}"
+			printf '%-14s %-20s %-6s %-10s %s\n' "${name}" "$(basename "${stamp}")" "${kind}" "${size}" "${label}"
 		done
 		return 0
 	fi
 
-	printf '%-14s %-20s %-10s %s\n' "INSTANCE" "STAMP" "SIZE" "LABEL"
+	printf '%-14s %-20s %-6s %-10s %s\n' "INSTANCE" "STAMP" "KIND" "SIZE" "LABEL"
 	for dir in "${BACKUPS_DIR}"/*/; do
 		name="$(basename "${dir}")"
 		for stamp in "${dir}"/20*; do
 			[ -d "${stamp}" ] || continue
 			label="$(cat "${stamp}/label" 2>/dev/null || echo manual)"
+			kind="$(cat "${stamp}/kind" 2>/dev/null || true)"
+			if [ -z "${kind}" ]; then
+				if [ -f "${stamp}/rootfs.ext4" ]; then
+					kind=full
+				else
+					kind=data
+				fi
+			fi
 			size="$(du -sh "${stamp}" 2>/dev/null | awk '{print $1}')"
-			printf '%-14s %-20s %-10s %s\n' "${name}" "$(basename "${stamp}")" "${size}" "${label}"
+			printf '%-14s %-20s %-6s %-10s %s\n' "${name}" "$(basename "${stamp}")" "${kind}" "${size}" "${label}"
 		done
 	done
 }

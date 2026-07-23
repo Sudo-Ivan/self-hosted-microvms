@@ -131,7 +131,15 @@ Validate with `./mvm validate` before finishing template work.
 
 - mem/vcpu: update `config.env`, apply on next boot (`--restart` to bounce)
 - data/rootfs: grow only, guest must be stopped (or pass `--restart`)
-- never shrink disks
+- never shrink disks (use `./mvm clone` to copy)
+
+## Clone, rename, snapshot, publish
+
+- `./mvm clone <src> <dst>` copy stopped instance with new IP/TAP (secrets not copied)
+- `./mvm rename <old> <new>` keep IP/CID, retarget paths and TAP name
+- `./mvm snapshot <name>` full rootfs+data backup (`./mvm backup --full` same)
+- `./mvm publish <name> --domain host [--via proxy]` host snippets or inject into caddy/nginx guest
+- Stack recipe: `docs/stacks/proxy-app-db.md`
 
 ## Common agent workflows
 
@@ -204,10 +212,12 @@ Never commit live credentials from `/data` volumes or generated admin passwords.
 - doctor/setup: host readiness and shared assets
 - deps: install host packages and Firecracker
 - up/create/start/stop/restart/destroy: instance lifecycle
+- clone/rename: copy or rename stopped instances
 - templates/info/validate/template new|sync: template UX
 - resize: mem/vcpu/disk growth
-- update/backup/restore/rollback: maintenance
+- update/backup/snapshot/restore/rollback: maintenance
+- publish/tls: reverse-proxy snippets or --via proxy guest
 - secrets: age vault and MMDS inject at start
 - argus *: firewall/DNS
-- sudoers/doas: passwordless root helpers
+- sudoers/doas: passwordless root helpers (then start/stop auto-elevate)
 - service *: host init autostart units

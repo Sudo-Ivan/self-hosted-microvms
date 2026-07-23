@@ -57,19 +57,19 @@ load_config() {
 	GATEWAY_IP="${GATEWAY_IP:-${SUBNET_PREFIX}.1}"
 	GUEST_PREFIX="${GUEST_PREFIX:-24}"
 	DNS="${DNS:-1.1.1.1}"
+	DEFAULT_MEM_MIB="${DEFAULT_MEM_MIB:-512}"
+	DEFAULT_VCPU_COUNT="${DEFAULT_VCPU_COUNT:-1}"
 	BASE_ROOTFS_SIZE_MIB="${BASE_ROOTFS_SIZE_MIB:-1024}"
 	DEFAULT_DATA_SIZE_MIB="${DEFAULT_DATA_SIZE_MIB:-2048}"
+	DEFAULT_PROFILE="${DEFAULT_PROFILE:-}"
+	DETACH="${DETACH:-1}"
+	SETUP_NET="${SETUP_NET:-1}"
 	KERNEL_PATH="${KERNEL_PATH:-${SHARED_DIR}/vmlinux}"
 	BASE_ROOTFS_PATH="${BASE_ROOTFS_PATH:-${SHARED_DIR}/base-rootfs.ext4}"
-	ODIN_ENABLED="${ODIN_ENABLED:-1}"
-	ARGUS_ENABLED="${ARGUS_ENABLED:-${ODIN_ENABLED:-1}}"
+	ARGUS_ENABLED="${ARGUS_ENABLED:-1}"
 	ARGUS_AUTO_APPLY="${ARGUS_AUTO_APPLY:-1}"
 	ARGUS_DIR="${REPO_ROOT}/argus"
 	ARGUS_POLICY_FILE="${ARGUS_POLICY_FILE:-${ARGUS_DIR}/policy.env}"
-	# Keep ODIN_* aliases so older config.env files still work.
-	ODIN_DIR="${ARGUS_DIR}"
-	ODIN_POLICY_FILE="${ARGUS_POLICY_FILE}"
-	ODIN_ENABLED="${ARGUS_ENABLED}"
 	BACKUPS_DIR="${BACKUPS_DIR:-${SHARED_DIR}/backups}"
 	BACKUP_KEEP="${BACKUP_KEEP:-5}"
 	WATCHDOG_INTERVAL="${WATCHDOG_INTERVAL:-30}"
@@ -136,6 +136,22 @@ run_as_root() {
 		return 0
 	fi
 	die "needs root and neither doas nor sudo is available (set MVM_ROOT_CMD)"
+}
+
+# Re-exec the current script as root when needed. Pass original "$@".
+# After passwordless doas/sudoers install, ./mvm start works without typing sudo.
+ensure_root() {
+	if [ "$(id -u)" -eq 0 ]; then
+		return 0
+	fi
+	if [ "${MVM_REEXEC:-0}" = "1" ]; then
+		die "needs root (install passwordless access: ./mvm sudoers install or ./mvm doas install)"
+	fi
+	if ! root_helper >/dev/null 2>&1; then
+		die "needs root and neither doas nor sudo is available (set MVM_ROOT_CMD, or ./mvm sudoers|doas install)"
+	fi
+	run_as_root env MVM_REEXEC=1 "$0" "$@"
+	exit $?
 }
 
 # Prefer the passwordless wrapper when present (paths with spaces are unsupported in sudoers).
@@ -206,9 +222,9 @@ load_template() {
 	TEMPLATE_NAME="${_load_name}"
 	TEMPLATE_DIR="${_load_dir}"
 
-	# Defaults templates may override.
-	TEMPLATE_VCPU_COUNT=1
-	TEMPLATE_MEM_MIB=512
+	# Defaults templates may override (host config.env supplies the baseline).
+	TEMPLATE_VCPU_COUNT="${DEFAULT_VCPU_COUNT}"
+	TEMPLATE_MEM_MIB="${DEFAULT_MEM_MIB}"
 	TEMPLATE_DATA_SIZE_MIB="${DEFAULT_DATA_SIZE_MIB}"
 	TEMPLATE_ROOTFS_SIZE_MIB="${BASE_ROOTFS_SIZE_MIB}"
 	TEMPLATE_PORT_FORWARDS=""

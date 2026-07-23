@@ -24,6 +24,8 @@ Usage:
   ./mvm template new <name> [--port N] [--tag TAG] [--desc TEXT]
   ./mvm template sync <instance> [--restart]
   ./mvm create <name> <template>
+  ./mvm clone <src> <dst>
+  ./mvm rename <old> <new>
   ./mvm start <name>
   ./mvm stop <name>
   ./mvm restart <name>
@@ -34,9 +36,11 @@ Usage:
   ./mvm logs <name>
   ./mvm update <name>
   ./mvm rollback <name> [stamp]
-  ./mvm backup <name> [label]
+  ./mvm backup <name> [label] [--full]
+  ./mvm snapshot <name> [label]
   ./mvm restore <name> [stamp]
   ./mvm watchdog [--once] [name]
+  ./mvm publish <name> --domain host.example.com [--via proxy] [--write]
   ./mvm tls <name> --domain host.example.com [--emit caddy|nginx|both] [--write]
   ./mvm destroy <name>
   ./mvm secrets init|set|unset|list|exists|export-mmds ...
@@ -96,6 +100,8 @@ EOF
 	esac
 	;;
 create) exec "${SCRIPTS}/create.sh" "$@" ;;
+clone) exec "${SCRIPTS}/clone.sh" "$@" ;;
+rename) exec "${SCRIPTS}/rename.sh" "$@" ;;
 start) exec "${SCRIPTS}/start.sh" "$@" ;;
 stop) exec "${SCRIPTS}/stop.sh" "$@" ;;
 restart) exec "${SCRIPTS}/restart.sh" "$@" ;;
@@ -112,9 +118,11 @@ backup)
 	fi
 	exec "${SCRIPTS}/backup.sh" "$@"
 	;;
+snapshot) exec "${SCRIPTS}/snapshot.sh" "$@" ;;
 restore) exec "${SCRIPTS}/restore.sh" "$@" ;;
 rollback) exec "${SCRIPTS}/rollback.sh" "$@" ;;
 watchdog) exec "${SCRIPTS}/watchdog.sh" "$@" ;;
+publish) exec "${SCRIPTS}/publish.sh" "$@" ;;
 tls) exec "${SCRIPTS}/tls.sh" "$@" ;;
 destroy) exec "${SCRIPTS}/destroy.sh" "$@" ;;
 secrets)
@@ -168,7 +176,7 @@ doas)
 		;;
 	esac
 	;;
-argus|odin)
+argus)
 	sub="${1:-}"
 	shift 2>/dev/null || :
 	case "${sub}" in

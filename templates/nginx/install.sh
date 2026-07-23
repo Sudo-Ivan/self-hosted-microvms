@@ -28,6 +28,7 @@ http {
 	default_type application/octet-stream;
 	access_log /data/nginx/logs/access.log;
 	sendfile on;
+	include /data/nginx/conf.d/*.conf;
 	server {
 		listen 80;
 		server_name _;

@@ -2,8 +2,8 @@
 # Show status for one instance or all instances.
 #
 # Usage:
-#   ./scripts/status.sh
-#   ./scripts/status.sh <name>
+#   ./scripts/list.sh
+#   ./scripts/list.sh <name>
 
 set -eu
 
