@@ -1,0 +1,13 @@
+# rns-page-node configuration (key=value)
+# Upstream: https://github.com/Quad4-Software/rns-page-node
+# Paths are absolute under the data volume.
+
+reticulum-config=/data/reticulum
+node-name=Page Node
+pages-dir=/data/rns-page-node/pages
+files-dir=/data/rns-page-node/files
+identity-dir=/data/rns-page-node/identity
+announce-interval=360
+page-refresh-interval=300
+file-refresh-interval=300
+log-level=INFO

@@ -390,6 +390,7 @@ Templates that consume injected secrets should include curl in PACKAGES. Guest-g
 - reticulum Reticulum Network Stack daemon (rnsd)
 - reticulum-go Reticulum-Go daemon
 - nomadnet Nomad Network daemon on Reticulum
+- rns-page-node serve pages and files over Reticulum
 - meshchatx MeshChatX headless web client for Reticulum
 - alpine-shell minimal idle guest for debugging
 
