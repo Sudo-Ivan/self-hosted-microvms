@@ -189,8 +189,12 @@ install_firecracker() {
 	info "downloading ${url}"
 	run curl -fsSL -o "${tmp}/fc.tgz" "${url}"
 	run tar -xzf "${tmp}/fc.tgz" -C "${tmp}"
-	bin="$(find "${tmp}" -type f -name firecracker -perm -111 | head -n1)"
-	[ -n "${bin}" ] || {
+	# Release layout: release-vX.Y.Z-ARCH/firecracker-vX.Y.Z-ARCH (not bare "firecracker").
+	bin="${tmp}/release-${tag}-${arch}/firecracker-${tag}-${arch}"
+	if [ ! -f "${bin}" ]; then
+		bin="$(find "${tmp}" -type f \( -name "firecracker-${tag}-${arch}" -o -name firecracker \) ! -name '*.debug' | head -n1)"
+	fi
+	[ -n "${bin}" ] && [ -f "${bin}" ] || {
 		rm -rf "${tmp}"
 		die "firecracker binary missing from archive"
 	}
