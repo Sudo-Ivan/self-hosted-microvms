@@ -94,7 +94,9 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-[ -n "${NAME}" ] && [ -n "${TEMPLATE}" ] || die "usage: $0 <name> <template> [--profile name] [--share path:path] [--mem N]"
+if [ -z "${NAME}" ] || [ -z "${TEMPLATE}" ]; then
+	die "usage: $0 <name> <template> [--profile name] [--share path:path] [--mem N]"
+fi
 
 info "checking host"
 if [ "${_UP_NEED_SHARE_DOCTOR}" = "1" ]; then

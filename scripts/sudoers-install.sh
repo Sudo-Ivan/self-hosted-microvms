@@ -50,8 +50,9 @@ if [ "${REMOVE}" = "1" ]; then
 	exit 0
 fi
 
-[ -n "${TARGET_USER}" ] && [ "${TARGET_USER}" != "root" ] \
-	|| die "pass --user <name> (refusing to install for root)"
+if [ -z "${TARGET_USER}" ] || [ "${TARGET_USER}" = "root" ]; then
+	die "pass --user <name> (refusing to install for root)"
+fi
 
 id "${TARGET_USER}" >/dev/null 2>&1 || die "user not found: ${TARGET_USER}"
 [ -f "${MVM}" ] || die "missing ${MVM}"

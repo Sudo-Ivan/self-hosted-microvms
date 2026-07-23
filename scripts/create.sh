@@ -18,7 +18,9 @@ require_cmd cp
 
 NAME="${1:-}"
 TEMPLATE="${2:-}"
-[ -n "${NAME}" ] && [ -n "${TEMPLATE}" ] || die "usage: $0 <name> <template>"
+if [ -z "${NAME}" ] || [ -z "${TEMPLATE}" ]; then
+	die "usage: $0 <name> <template>"
+fi
 validate_name "${NAME}"
 
 # Preserve caller overrides before profile and template manifests are sourced.

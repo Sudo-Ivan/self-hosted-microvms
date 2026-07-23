@@ -50,7 +50,9 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-[ -n "${NAME}" ] && [ -n "${DOMAIN}" ] || die "usage: $0 <name> --domain host.example.com [--emit caddy|nginx|both] [--write]"
+if [ -z "${NAME}" ] || [ -z "${DOMAIN}" ]; then
+	die "usage: $0 <name> --domain host.example.com [--emit caddy|nginx|both] [--write]"
+fi
 load_instance "${NAME}"
 
 host_port="${HEALTH_PORT:-}"

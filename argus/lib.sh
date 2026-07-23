@@ -172,7 +172,9 @@ argus_collect_state() {
 	_ac_ingress_extra=
 
 	argus_foreach_instance | while IFS='	' read -r _ac_name _ac_ip _ac_tap _ac_ports; do
-		[ -n "${_ac_name}" ] && [ -n "${_ac_ip}" ] || continue
+		if [ -z "${_ac_name}" ] || [ -z "${_ac_ip}" ]; then
+			continue
+		fi
 		printf '%s\n' "${_ac_ip}" >>"${ARGUS_GUESTS_FILE}"
 
 		argus_load_instance_firewall "${_ac_name}"

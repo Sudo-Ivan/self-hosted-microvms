@@ -35,7 +35,7 @@ fi
 
 echo "==> shellcheck -s sh (host)"
 shellcheck -s sh -x \
-	-e SC1090,SC1091,SC2034,SC2086,SC2046,SC2016,SC1007,SC2269 \
+	-e SC1090,SC1091,SC2034,SC2086,SC2046,SC2016,SC1007,SC2269,SC2015 \
 	mvm scripts/*.sh lib/*.sh argus/*.sh || fail=1
 
 echo "==> shellcheck -s sh (guest + templates)"

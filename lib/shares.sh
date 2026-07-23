@@ -33,7 +33,9 @@ shares_parse() {
 		ro|rw) ;;
 		*) die "bad HOST_SHARES mode in '${entry}' (use ro or rw)" ;;
 		esac
-		[ -n "${host_path}" ] && [ -n "${guest_path}" ] || die "bad HOST_SHARES entry: ${entry}"
+		if [ -z "${host_path}" ] || [ -z "${guest_path}" ]; then
+			die "bad HOST_SHARES entry: ${entry}"
+		fi
 		case "${guest_path}" in
 		/*) ;;
 		*) die "guest path must be absolute: ${guest_path}" ;;
