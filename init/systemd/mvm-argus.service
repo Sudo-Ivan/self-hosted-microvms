@@ -1,0 +1,18 @@
+# Argus firewall and DNS for microVM guests.
+# Install with: sudo ./mvm service install systemd
+
+[Unit]
+Description=mvm Argus firewall and DNS
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=@MVM_ROOT@
+ExecStart=@MVM_ROOT@/mvm argus apply
+ExecStop=@MVM_ROOT@/mvm argus flush
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

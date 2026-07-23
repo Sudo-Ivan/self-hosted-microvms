@@ -1,0 +1,206 @@
+#!/bin/sh
+# Thin dispatcher for common microvm operations.
+
+set -eu
+
+ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+SCRIPTS="${ROOT}/scripts"
+ARGUS="${ROOT}/argus"
+CMD="${1:-}"
+shift 2>/dev/null || :
+
+usage() {
+	cat <<'EOF'
+Usage:
+  ./mvm doctor
+  ./mvm setup
+  ./mvm profiles
+  ./mvm up <name> <template> [--profile name] [--share host:guest] [--mem N]
+  ./mvm templates [--tag=NAME] [--json] [--tags]
+  ./mvm info <template>
+  ./mvm validate
+  ./mvm check-posix
+  ./mvm template new <name> [--port N] [--tag TAG] [--desc TEXT]
+  ./mvm template sync <instance> [--restart]
+  ./mvm create <name> <template>
+  ./mvm start <name>
+  ./mvm stop <name>
+  ./mvm restart <name>
+  ./mvm resize <name> [--mem N] [--vcpu N] [--data-mib N] [--restart]
+  ./mvm list
+  ./mvm urls [name]
+  ./mvm health [name] [--wait]
+  ./mvm logs <name>
+  ./mvm update <name>
+  ./mvm rollback <name> [stamp]
+  ./mvm backup <name> [label]
+  ./mvm restore <name> [stamp]
+  ./mvm watchdog [--once] [name]
+  ./mvm tls <name> --domain host.example.com [--emit caddy|nginx|both] [--write]
+  ./mvm destroy <name>
+  ./mvm secrets init|set|unset|list|exists|export-mmds ...
+  ./mvm service install|enable|disable|list ...
+  ./mvm sudoers install|remove
+  ./mvm doas install|remove
+  ./mvm argus apply|status|queries|watch|drops|dns-update|flush
+
+Examples:
+  ./mvm up navi navidrome --profile media --share /home/user/Music:/data/navidrome/music:ro
+  ./mvm templates --tag=media
+  ./mvm info navidrome
+  ./mvm template new myapp --port 8080 --tag tools
+  ./mvm resize navi --mem 1024 --vcpu 2 --restart
+  ./mvm secrets init
+  ./mvm secrets set navi NAVIDROME_PASSWORD='...'
+  doas ./mvm doas install
+  sudo ./mvm sudoers install
+  sudo ./mvm service install systemd
+  sudo ./mvm service enable navi
+EOF
+}
+
+case "${CMD}" in
+doctor) exec "${SCRIPTS}/doctor.sh" "$@" ;;
+setup) exec "${SCRIPTS}/setup.sh" "$@" ;;
+profiles) exec "${SCRIPTS}/profiles.sh" "$@" ;;
+up) exec "${SCRIPTS}/up.sh" "$@" ;;
+templates) exec "${SCRIPTS}/templates.sh" "$@" ;;
+info) exec "${SCRIPTS}/info.sh" "$@" ;;
+validate) exec "${SCRIPTS}/validate-templates.sh" "$@" ;;
+check-posix|posix) exec "${SCRIPTS}/check-posix.sh" "$@" ;;
+template)
+	sub="${1:-}"
+	shift 2>/dev/null || :
+	case "${sub}" in
+	new) exec "${SCRIPTS}/template-new.sh" "$@" ;;
+	sync) exec "${SCRIPTS}/template-sync.sh" "$@" ;;
+	""|-h|--help)
+		cat <<'EOF'
+Template authoring:
+  ./mvm template new <name> [--port N] [--tag TAG] [--desc TEXT]
+  ./mvm template sync <instance> [--restart]
+  ./mvm templates [--tag=NAME]
+  ./mvm info <template>
+  ./mvm validate
+EOF
+		exit 0
+		;;
+	*)
+		echo "usage: ./mvm template new|sync ..." >&2
+		exit 1
+		;;
+	esac
+	;;
+create) exec "${SCRIPTS}/create.sh" "$@" ;;
+start) exec "${SCRIPTS}/start.sh" "$@" ;;
+stop) exec "${SCRIPTS}/stop.sh" "$@" ;;
+restart) exec "${SCRIPTS}/restart.sh" "$@" ;;
+resize) exec "${SCRIPTS}/resize.sh" "$@" ;;
+list|status) exec "${SCRIPTS}/list.sh" "$@" ;;
+urls) exec "${SCRIPTS}/urls.sh" "$@" ;;
+health) exec "${SCRIPTS}/health.sh" "$@" ;;
+logs) exec "${SCRIPTS}/logs.sh" "$@" ;;
+update) exec "${SCRIPTS}/update.sh" "$@" ;;
+backup)
+	if [ "${1:-}" = "list" ] || [ "${1:-}" = "--list" ]; then
+		shift 2>/dev/null || :
+		exec "${SCRIPTS}/backup.sh" --list "$@"
+	fi
+	exec "${SCRIPTS}/backup.sh" "$@"
+	;;
+restore) exec "${SCRIPTS}/restore.sh" "$@" ;;
+rollback) exec "${SCRIPTS}/rollback.sh" "$@" ;;
+watchdog) exec "${SCRIPTS}/watchdog.sh" "$@" ;;
+tls) exec "${SCRIPTS}/tls.sh" "$@" ;;
+destroy) exec "${SCRIPTS}/destroy.sh" "$@" ;;
+secrets)
+	case "${1:-}" in
+	""|-h|--help)
+		cat <<'EOF'
+Host secrets vault (age encrypted, delivered via MMDS at start):
+  ./mvm secrets init [--force] [--passphrase] [--tpm] [--no-tpm]
+  ./mvm secrets protect status
+  ./mvm secrets set <instance> KEY=VALUE... [--env-file FILE]
+  ./mvm secrets unset <instance> KEY
+  ./mvm secrets list [instance]
+  ./mvm secrets exists <instance>
+  ./mvm secrets export-mmds <instance>
+
+Build the CLI once with:
+  ./scripts/build-mvmsec.sh
+
+Passphrase unlock for non-interactive start:
+  MVM_SECRETS_PASSPHRASE or MVM_SECRETS_PASSPHRASE_FILE
+EOF
+		exit 0
+		;;
+	esac
+	exec "${SCRIPTS}/secrets.sh" "$@"
+	;;
+service)
+	exec "${SCRIPTS}/service-install.sh" "$@"
+	;;
+sudoers)
+	sub="${1:-install}"
+	shift 2>/dev/null || :
+	case "${sub}" in
+	install|"") exec "${SCRIPTS}/sudoers-install.sh" "$@" ;;
+	remove) exec "${SCRIPTS}/sudoers-install.sh" --remove "$@" ;;
+	*)
+		echo "usage: ./mvm sudoers install|remove [--user name]" >&2
+		exit 1
+		;;
+	esac
+	;;
+doas)
+	sub="${1:-install}"
+	shift 2>/dev/null || :
+	case "${sub}" in
+	install|"") exec "${SCRIPTS}/doas-install.sh" "$@" ;;
+	remove) exec "${SCRIPTS}/doas-install.sh" --remove "$@" ;;
+	*)
+		echo "usage: ./mvm doas install|remove [--user name]" >&2
+		exit 1
+		;;
+	esac
+	;;
+argus|odin)
+	sub="${1:-}"
+	shift 2>/dev/null || :
+	case "${sub}" in
+	apply) exec "${ARGUS}/apply.sh" "$@" ;;
+	status) exec "${ARGUS}/status.sh" "$@" ;;
+	watch) exec "${ARGUS}/watch.sh" "$@" ;;
+	drops) exec "${ARGUS}/drops.sh" "$@" ;;
+	dns-update|dns) exec "${ARGUS}/dns-update.sh" "$@" ;;
+	queries|dns-log) exec "${ARGUS}/queries.sh" "$@" ;;
+	flush) exec "${ARGUS}/flush.sh" "$@" ;;
+	""|-h|--help)
+		cat <<'EOF'
+Argus central firewall and DNS:
+  ./mvm argus apply
+  ./mvm argus status [name]
+  ./mvm argus queries [name] [lines]
+  ./mvm argus watch [name]
+  ./mvm argus drops [lines]
+  ./mvm argus dns-update
+  ./mvm argus flush
+EOF
+		exit 0
+		;;
+	*)
+		echo "unknown argus command: ${sub}" >&2
+		exit 1
+		;;
+	esac
+	;;
+""|-h|--help)
+	usage
+	exit 0
+	;;
+*)
+	echo "unknown command: ${CMD}" >&2
+	usage >&2
+	exit 1
+	;;
+esac

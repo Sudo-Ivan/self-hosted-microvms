@@ -1,0 +1,11 @@
+#!/bin/sh
+# Per-instance runit service. INSTANCE is substituted at install time.
+exec 2>&1
+sv check mvm-argus >/dev/null 2>&1 || sv up mvm-argus
+"@MVM_ROOT@/mvm" start "@INSTANCE@"
+pidfile="@MVM_ROOT@/instances/@INSTANCE@/firecracker.pid"
+while [ -f "${pidfile}" ]; do
+	pid="$(cat "${pidfile}" 2>/dev/null)" || break
+	kill -0 "${pid}" 2>/dev/null || break
+	sleep 2
+done

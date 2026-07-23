@@ -1,0 +1,5 @@
+# Guest network defaults. Replaced per instance at create time.
+GUEST_IP=10.100.0.10
+GUEST_PREFIX=24
+GATEWAY=10.100.0.1
+DNS=1.1.1.1

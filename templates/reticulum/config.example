@@ -1,0 +1,23 @@
+# Starter Reticulum config for a microVM transport node.
+# Edit /data/reticulum/config after first boot as needed.
+# Full options: rnsd --exampleconfig
+# Docs: https://reticulum.network/manual/using.html
+
+[reticulum]
+  enable_transport = Yes
+  share_instance = Yes
+
+[logging]
+  loglevel = 4
+
+[interfaces]
+
+  [[Default Interface]]
+    type = AutoInterface
+    enabled = yes
+
+  [[TCP Server Interface]]
+    type = TCPServerInterface
+    enabled = yes
+    listen_ip = 0.0.0.0
+    listen_port = 4242

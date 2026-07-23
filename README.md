@@ -11,21 +11,6 @@ Each service gets its own lightweight VM, private network interface, and persist
 - Simple create, start, stop, update, and destroy lifecycle
 - Templates stay generic with no hostnames, accounts, or secrets in the repo
 
-## Layout
-
-- config.example.env: copy to config.env
-- mvm: command dispatcher
-- AGENTS.md: guidance for coding agents
-- cmd/mvmsec: age-backed host secrets CLI
-- scripts: host lifecycle tools
-- lib: shared shell helpers
-- guest: guest PID 1 and boot hooks
-- argus: central firewall, DNS, and traffic visibility
-- templates: service templates
-- shared: kernel, base rootfs, and secrets vault (local)
-- instances: live instances (local)
-- docs/INSTRUCTIONS.md: operator guide
-
 ## Requirements
 
 - Linux with KVM (/dev/kvm readable)

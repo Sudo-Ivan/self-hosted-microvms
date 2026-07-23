@@ -1,0 +1,25 @@
+# Starter config for Reticulum-Go in a microVM.
+# Edit /data/reticulum-go/config after first boot as needed.
+# Docs: https://reticulum-go.quad4.io/docs/configuration/
+
+[reticulum]
+  enable_transport = Yes
+  share_instance = Yes
+  # Already isolated in Firecracker. Disable Landlock/seccomp path limits.
+  enable_sandbox = No
+
+[logging]
+  loglevel = 4
+  destination = stderr
+
+[interfaces]
+
+  [[Default Interface]]
+    type = AutoInterface
+    enabled = yes
+
+  [[TCP Server Interface]]
+    type = TCPServerInterface
+    enabled = yes
+    listen_ip = 0.0.0.0
+    listen_port = 4242

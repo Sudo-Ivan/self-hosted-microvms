@@ -1,0 +1,4 @@
+# Local blocklist additions for Argus DNS.
+# One domain per line, or hosts format:
+# 0.0.0.0 ads.example.com
+# Rename to *.list or add more *.list files in this directory.

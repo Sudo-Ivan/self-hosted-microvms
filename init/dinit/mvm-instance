@@ -1,0 +1,8 @@
+# Per-instance dinit service. @INSTANCE@ is substituted at enable time.
+
+type = scripted
+command = @MVM_ROOT@/mvm start @INSTANCE@
+stop-command = @MVM_ROOT@/mvm stop @INSTANCE@
+restart = false
+waits-for.1 = mvm-argus
+waits-for.2 = network.target

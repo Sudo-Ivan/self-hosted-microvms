@@ -1,0 +1,3 @@
+#!/bin/sh
+# runit finish for Argus (flush on down).
+exec "@MVM_ROOT@/mvm" argus flush

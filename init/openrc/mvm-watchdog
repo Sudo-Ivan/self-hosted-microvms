@@ -1,0 +1,12 @@
+#!/sbin/openrc-run
+# Health watchdog for mvm guests.
+
+description="mvm guest health watchdog"
+command="@MVM_ROOT@/mvm"
+command_args="watchdog"
+command_background=true
+pidfile="/run/mvm-watchdog.pid"
+
+depend() {
+	need net mvm-argus
+}

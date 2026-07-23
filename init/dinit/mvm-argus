@@ -1,0 +1,8 @@
+# Argus firewall and DNS (dinit)
+# Install with: sudo ./mvm service install dinit
+
+type = scripted
+command = @MVM_ROOT@/mvm argus apply
+stop-command = @MVM_ROOT@/mvm argus flush
+restart = false
+waits-for.1 = network.target

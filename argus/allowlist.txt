@@ -1,0 +1,3 @@
+# Domains listed here are never blocked by Argus DNS.
+# One domain per line.
+# example.com

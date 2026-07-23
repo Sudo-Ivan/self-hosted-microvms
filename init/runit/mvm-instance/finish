@@ -1,0 +1,3 @@
+#!/bin/sh
+# Stop instance when the service is taken down.
+exec "@MVM_ROOT@/mvm" stop "@INSTANCE@"

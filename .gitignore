@@ -1,0 +1,51 @@
+# Local host configuration and secrets
+config.env
+*.local.env
+.env
+.env.*
+!.env.example
+
+# Built assets and live instances
+/shared/**
+!/shared/.gitkeep
+/instances/**
+!/instances/.gitkeep
+
+# Optional local binaries dropped into templates
+templates/*/bin/*
+!templates/*/bin/.gitkeep
+
+# Runtime sockets, logs, and partial downloads
+*.sock
+*.pid
+*.log
+*.partial
+firecracker.log
+firecracker.stdout
+firecracker.stderr
+vm-config.json
+
+# Editor and OS noise
+*~
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# Language tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+/vendor/
+
+# Test / scratch
+/tmp/
+*.bak
+*.orig
+
+# Local checker binaries
+.tools/

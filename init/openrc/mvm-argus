@@ -1,0 +1,22 @@
+#!/sbin/openrc-run
+# Argus firewall and DNS.
+# Install with: sudo ./mvm service install openrc
+
+description="mvm Argus firewall and DNS"
+
+depend() {
+	need net
+	after firewall
+}
+
+start() {
+	ebegin "Applying mvm Argus policy"
+	"@MVM_ROOT@/mvm" argus apply
+	eend $?
+}
+
+stop() {
+	ebegin "Flushing mvm Argus policy"
+	"@MVM_ROOT@/mvm" argus flush
+	eend $?
+}

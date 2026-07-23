@@ -1,0 +1,7 @@
+# Health watchdog (dinit)
+
+type = process
+command = @MVM_ROOT@/mvm watchdog
+restart = true
+waits-for.1 = mvm-argus
+waits-for.2 = network.target

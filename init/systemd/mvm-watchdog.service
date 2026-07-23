@@ -1,0 +1,17 @@
+# Health watchdog for mvm guests.
+# Install with: sudo ./mvm service install systemd
+
+[Unit]
+Description=mvm guest health watchdog
+After=network-online.target mvm-argus.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@MVM_ROOT@
+ExecStart=@MVM_ROOT@/mvm watchdog
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

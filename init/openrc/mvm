@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+# Generic instance service. Install as /etc/init.d/mvm.NAME with conf.d.
+# conf.d example: instance="navi"
+
+description="mvm microVM instance"
+instance="${instance:-}"
+
+depend() {
+	need net mvm-argus
+}
+
+start() {
+	[ -n "${instance}" ] || { eerror "instance is not set in conf.d"; return 1; }
+	ebegin "Starting mvm instance ${instance}"
+	"@MVM_ROOT@/mvm" start "${instance}"
+	eend $?
+}
+
+stop() {
+	[ -n "${instance}" ] || return 0
+	ebegin "Stopping mvm instance ${instance}"
+	"@MVM_ROOT@/mvm" stop "${instance}"
+	eend $?
+}
+
+status() {
+	[ -n "${instance}" ] || return 1
+	"@MVM_ROOT@/mvm" list | grep -E "^${instance}[[:space:]]" | grep -q running
+}

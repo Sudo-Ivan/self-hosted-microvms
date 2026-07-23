@@ -1,0 +1,85 @@
+#!/bin/sh
+# PID 1 for Firecracker guests.
+
+set -eu
+
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+mkdir -p /dev/pts /tmp /run /var/log /data /var/lib/microvm
+mount -t devpts devpts /dev/pts 2>/dev/null || true
+mount -t tmpfs tmpfs /tmp
+mount -t tmpfs tmpfs /run
+
+if [ -f /etc/microvm-net ]; then
+	# shellcheck disable=SC1091
+	. /etc/microvm-net
+fi
+
+GUEST_IP="${GUEST_IP:-10.100.0.10}"
+GUEST_PREFIX="${GUEST_PREFIX:-24}"
+GATEWAY="${GATEWAY:-10.100.0.1}"
+DNS="${DNS:-1.1.1.1}"
+
+printf 'nameserver %s\n' "${DNS}" >/etc/resolv.conf
+
+if command -v ip >/dev/null 2>&1; then
+	ip link set lo up 2>/dev/null || true
+	if ip link show eth0 >/dev/null 2>&1; then
+		ip link set eth0 up 2>/dev/null || true
+		ip addr add "${GUEST_IP}/${GUEST_PREFIX}" dev eth0 2>/dev/null || true
+		ip route add default via "${GATEWAY}" 2>/dev/null || true
+		echo "guest net ${GUEST_IP}/${GUEST_PREFIX} via ${GATEWAY}"
+	fi
+fi
+
+# Mount second drive as /data when present.
+if [ -b /dev/vdb ]; then
+	if ! grep -q ' /data ' /proc/mounts 2>/dev/null; then
+		mount -t ext4 /dev/vdb /data
+	fi
+	echo "mounted /dev/vdb on /data"
+fi
+
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+MODE=run
+for arg in $(cat /proc/cmdline); do
+	case "${arg}" in
+	microvm.mode=*)
+		MODE="${arg#microvm.mode=}"
+		;;
+	esac
+done
+
+if [ "${MODE}" = "update" ]; then
+	echo "running guest package update"
+	/etc/microvm/update-guest.sh
+	sync
+	poweroff -f 2>/dev/null || reboot -f
+	exit 0
+fi
+
+if [ ! -f /var/lib/microvm/provisioned ]; then
+	echo "first boot provisioning"
+	/etc/microvm/first-boot.sh
+	touch /var/lib/microvm/provisioned
+	sync
+fi
+
+# Host shares need guest packages (nfs-utils) so mount after provisioning.
+if [ -f /etc/microvm-shares ]; then
+	if ! /etc/microvm/mount-shares.sh; then
+		echo "share mount failed" >&2
+		# Keep the guest up for debugging via serial logs.
+		sleep 30
+		poweroff -f 2>/dev/null || reboot -f
+		exit 1
+	fi
+fi
+
+echo "starting service"
+if [ -x /etc/microvm/fetch-secrets.sh ]; then
+	/etc/microvm/fetch-secrets.sh || echo "fetch-secrets failed (continuing)" >&2
+fi
+exec /etc/microvm/run-service.sh

@@ -1,0 +1,22 @@
+# One microVM instance. Enable with: systemctl enable --now mvm@NAME
+# Install with: sudo ./mvm service install systemd
+
+[Unit]
+Description=mvm microVM %i
+After=network-online.target mvm-argus.service
+Wants=network-online.target
+Requires=mvm-argus.service
+
+[Service]
+Type=forking
+WorkingDirectory=@MVM_ROOT@
+PIDFile=@MVM_ROOT@/instances/%i/firecracker.pid
+ExecStart=@MVM_ROOT@/mvm start %i
+ExecStop=@MVM_ROOT@/mvm stop %i
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=120
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

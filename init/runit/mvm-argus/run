@@ -1,0 +1,5 @@
+#!/bin/sh
+# runit service for Argus. Apply once and stay up for dependents.
+exec 2>&1
+"@MVM_ROOT@/mvm" argus apply
+exec sleep infinity
