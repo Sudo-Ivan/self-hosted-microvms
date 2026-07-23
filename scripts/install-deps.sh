@@ -178,12 +178,23 @@ install_firecracker() {
 		;;
 	esac
 	info "fetching latest Firecracker release for ${arch}"
-	tag="$(
-		curl -fsSL https://api.github.com/repos/firecracker-microvm/firecracker/releases/latest \
-			| sed -n 's/.*"tag_name":[[:space:]]*"\(v[^"]*\)".*/\1/p' \
-			| head -n1
-	)"
-	[ -n "${tag}" ] || die "could not resolve Firecracker release tag"
+	# Prefer the /releases/latest redirect (avoids api.github.com rate limits / 403 in CI).
+	# Override with FIRECRACKER_VERSION=vX.Y.Z when needed.
+	tag="${FIRECRACKER_VERSION:-}"
+	if [ -z "${tag}" ]; then
+		tag="$(
+			basename "$(
+				curl -fsSLI -o /dev/null -w '%{url_effective}' \
+					https://github.com/firecracker-microvm/firecracker/releases/latest
+			)"
+		)"
+	fi
+	case "${tag}" in
+	v[0-9]*) ;;
+	*)
+		die "could not resolve Firecracker release tag (got '${tag}')"
+		;;
+	esac
 	url="https://github.com/firecracker-microvm/firecracker/releases/download/${tag}/firecracker-${tag}-${arch}.tgz"
 	tmp="$(mktemp -d "${TMPDIR:-/tmp}/mvm-fc.XXXXXX")"
 	info "downloading ${url}"
