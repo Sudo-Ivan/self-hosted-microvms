@@ -395,6 +395,16 @@ Templates that consume injected secrets should include curl in PACKAGES. Guest-g
 - minecraft-vanilla Mojang Java server (dynamic release)
 - minecraft-paper Paper server (dynamic Fill v3 build)
 - minecraft-fabric Fabric server (dynamic meta versions)
+- minetest Minetest / Luanti voxel server (Alpine package)
+- freeciv FreeCiv strategy server (Alpine package)
+- xonotic Xonotic FPS dedicated server (Alpine package)
+- supertuxkart SuperTuxKart racing server (Alpine package)
+- widelands Widelands RTS dedicated server (Alpine package)
+- mindustry Mindustry server (dynamic GitHub jar)
+- factorio Factorio headless (dynamic official download)
+- openttd OpenTTD dedicated (dynamic CDN release)
+- teeworlds Teeworlds server (dynamic GitHub release)
+- terraria-tshock Terraria TShock server (dynamic GitHub release)
 - alpine-shell minimal idle guest for debugging
 
 ## Adding a template
