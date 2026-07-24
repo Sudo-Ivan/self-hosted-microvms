@@ -392,6 +392,9 @@ Templates that consume injected secrets should include curl in PACKAGES. Guest-g
 - nomadnet Nomad Network daemon on Reticulum
 - rns-page-node serve pages and files over Reticulum
 - meshchatx MeshChatX headless web client for Reticulum
+- minecraft-vanilla Mojang Java server (dynamic release)
+- minecraft-paper Paper server (dynamic Fill v3 build)
+- minecraft-fabric Fabric server (dynamic meta versions)
 - alpine-shell minimal idle guest for debugging
 
 ## Adding a template

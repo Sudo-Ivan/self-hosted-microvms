@@ -1,6 +1,6 @@
 # Starter Reticulum config for rns-page-node in a microVM.
 # Edit /data/reticulum/config after first boot as needed.
-# Docs: https://reticulum.network/manual/using.html
+# Docs: https://reticulum.network/manual/interfaces.html
 
 [reticulum]
   enable_transport = Yes
@@ -20,3 +20,13 @@
     enabled = yes
     listen_ip = 0.0.0.0
     listen_port = 4242
+
+  # Example remote backbone peer (fill in host/port/IFAC yourself).
+  # Do not commit real passphrases into the template tree.
+  # [[Remote Backbone]]
+  #   type = BackboneInterface
+  #   enabled = yes
+  #   remote = peer.example.com
+  #   target_port = 4242
+  #   network_name = example_net
+  #   passphrase = change-me

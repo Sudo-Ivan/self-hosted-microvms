@@ -36,3 +36,9 @@ This microVM is running rns-page-node.
 Edit pages under /data/rns-page-node/pages and files under /data/rns-page-node/files.
 EOF
 fi
+
+# Service runs as svc (HARDEN=setpriv). Keep install tree readable/executable.
+chown -R svc:svc /opt/service 2>/dev/null || true
+chown -R svc:svc /data/reticulum /data/rns-page-node 2>/dev/null || true
+
+echo "rns-page-node ${RNS_PAGE_NODE_VERSION} installed"
