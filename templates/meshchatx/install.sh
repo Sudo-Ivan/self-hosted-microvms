@@ -5,7 +5,7 @@
 
 set -eu
 
-VERSION="${MESHCHATX_VERSION:-4.7.2}"
+VERSION="${MESHCHATX_VERSION:-4.8.1}"
 
 mkdir -p /opt/service /data/reticulum /data/meshchatx
 
