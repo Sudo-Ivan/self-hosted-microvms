@@ -13,8 +13,12 @@ set -eu
 . "${LIB_DIR}/network.sh"
 load_config
 
-# Elevate early so TAP teardown and Argus refresh always run.
-ensure_root "$@"
+# Elevate for bridge mode or when root is needed for TAP teardown and Argus.
+if mvm_net_mode_user && [ "$(id -u)" -ne 0 ]; then
+	:
+else
+	ensure_root "$@"
+fi
 
 stop_one() {
 	name="$1"
@@ -41,7 +45,11 @@ stop_one() {
 	fi
 
 	if [ "${KEEP_TAP:-0}" != "1" ]; then
-		teardown_tap "${TAP_DEV}"
+		if mvm_net_mode_user && [ "$(id -u)" -ne 0 ]; then
+			echo "NETWORK_MODE=user: leaving tap ${TAP_DEV} in place (sudo ./mvm net prepare to recreate)"
+		else
+			teardown_tap "${TAP_DEV}"
+		fi
 	fi
 
 	# shellcheck source=../lib/shares.sh
@@ -53,7 +61,7 @@ stop_one() {
 	argus_load_global_policy
 	if [ "${ARGUS_ENABLED}" = "1" ] && [ "$(id -u)" -eq 0 ] && command -v nft >/dev/null 2>&1; then
 		argus_apply >/dev/null
-	else
+	elif [ "$(id -u)" -eq 0 ]; then
 		remove_port_forwards "${GUEST_IP}" "${PORT_FORWARDS}"
 	fi
 

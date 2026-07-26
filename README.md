@@ -83,6 +83,7 @@ Handy template browse:
 | ./mvm run template | Create/start with default instance name |
 | ./mvm pick | Interactive template picker (fzf or menu) |
 | ./mvm up name template | Create if needed, start, wait healthy |
+| ./mvm net prepare | One-time root setup for NETWORK_MODE=user |
 | ./mvm migrate dir | Match Docker Compose services to templates |
 | ./mvm templates | List templates (optional --tag=NAME) |
 | ./mvm info template | Ports, tags, notes, example |
@@ -125,9 +126,18 @@ Handy template browse:
 | ./mvm argus dns-update | Refresh remote DNS blocklists |
 | ./mvm argus flush | Remove Argus nftables table and DNS |
 
-doas or sudo is required for start and stop with default TAP networking. Install passwordless access with doas ./mvm doas install or sudo ./mvm sudoers install. After that, ./mvm start|stop|argus auto-elevates so you do not need to type sudo each time. If both helpers exist, set MVM_ROOT_CMD to pick one.
+doas or sudo is required for start and stop when `NETWORK_MODE=bridge` (default). Install passwordless access with doas ./mvm doas install or sudo ./mvm sudoers install. After that, ./mvm start|stop|argus auto-elevates so you do not need to type sudo each time. If both helpers exist, set MVM_ROOT_CMD to pick one.
 
-Every start refreshes Argus when ARGUS_ENABLED=1.
+For **user networking**, set `NETWORK_MODE=user` in `config.env`, then once as root:
+
+```bash
+sudo ./mvm net prepare --host
+sudo ./mvm net prepare --all
+```
+
+After that, `./mvm start` and `./mvm stop` can run as your normal user (KVM group still required). Argus and port policy still need `sudo ./mvm argus apply` when guests or firewall files change.
+
+Every start refreshes Argus when ARGUS_ENABLED=1 and NETWORK_MODE=bridge (or when start runs as root).
 
 Debug boot without networking:
 

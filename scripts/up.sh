@@ -142,7 +142,11 @@ else
 fi
 
 info "starting ${NAME}"
-run_as_root "$(mvm_bin)" start "${NAME}"
+if mvm_net_mode_user; then
+	"$(mvm_bin)" start "${NAME}"
+else
+	run_as_root "$(mvm_bin)" start "${NAME}"
+fi
 
 load_instance "${NAME}"
 if [ "${WAIT}" = "1" ]; then
@@ -160,7 +164,7 @@ if [ "${WAIT}" = "1" ]; then
 		echo "  guest:  ${GUEST_IP}"
 		echo "  logs:   ./mvm logs ${NAME}"
 		echo "  health: ./mvm health ${NAME}"
-		echo "  stop:   sudo ./mvm stop ${NAME}"
+		echo "  stop:   ./mvm stop ${NAME}"
 	else
 		echo
 		echo "${NAME} started but health checks timed out"

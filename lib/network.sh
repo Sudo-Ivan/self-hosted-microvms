@@ -162,3 +162,41 @@ enable_masquerade() {
 	iptables -C FORWARD -i "${outif}" -o "${BRIDGE_NAME}" -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null \
 		|| iptables -A FORWARD -i "${outif}" -o "${BRIDGE_NAME}" -m state --state RELATED,ESTABLISHED -j ACCEPT
 }
+
+prepare_tap_for_user() {
+	tap="$1"
+	net_user="$2"
+	net_group="${3:-}"
+
+	if [ "$(id -u)" -ne 0 ]; then
+		die "prepare_tap_for_user needs root"
+	fi
+
+	setup_bridge
+
+	if ip link show "${tap}" >/dev/null 2>&1; then
+		ip link set "${tap}" down 2>/dev/null || true
+		ip link delete "${tap}" 2>/dev/null || true
+	fi
+
+	if [ -n "${net_group}" ]; then
+		ip tuntap add mode tap name "${tap}" user "${net_user}" group "${net_group}"
+	else
+		ip tuntap add mode tap name "${tap}" user "${net_user}"
+	fi
+
+	ip link set "${tap}" master "${BRIDGE_NAME}"
+	ip link set "${tap}" up
+}
+
+setup_tap_user() {
+	tap="$1"
+
+	if ! ip link show "${tap}" >/dev/null 2>&1; then
+		die "tap ${tap} missing (run: sudo ./mvm net prepare <instance>)"
+	fi
+
+	if ! ip link show "${tap}" 2>/dev/null | grep -qE 'state (UP|UNKNOWN)'; then
+		die "tap ${tap} is not up (run: sudo ./mvm net prepare <instance>)"
+	fi
+}

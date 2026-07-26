@@ -32,18 +32,34 @@ SETUP_NET="${SETUP_NET:-1}"
 TAP_FOR_VM="${TAP_DEV}"
 
 if [ "${SETUP_NET}" = "1" ]; then
-	ensure_root "$@"
-	setup_tap "${TAP_DEV}"
-	# shellcheck source=../argus/lib.sh
-	. "${REPO_ROOT}/argus/lib.sh"
-	argus_load_global_policy
-	if [ "${ARGUS_ENABLED}" = "1" ]; then
-		# Always refresh policy so new guests and ports are live.
-		info "applying Argus firewall and DNS"
-		argus_apply
+	if mvm_net_mode_user && [ "$(id -u)" -ne 0 ]; then
+		setup_tap_user "${TAP_DEV}"
+		echo "NETWORK_MODE=user: skipping Argus and port-forward setup (use sudo ./mvm net prepare and argus apply)"
+	elif mvm_net_mode_user && [ "$(id -u)" -eq 0 ]; then
+		setup_tap "${TAP_DEV}"
+		# shellcheck source=../argus/lib.sh
+		. "${REPO_ROOT}/argus/lib.sh"
+		argus_load_global_policy
+		if [ "${ARGUS_ENABLED}" = "1" ]; then
+			info "applying Argus firewall and DNS"
+			argus_apply
+		else
+			enable_masquerade
+			apply_port_forwards "${GUEST_IP}" "${PORT_FORWARDS}"
+		fi
 	else
-		enable_masquerade
-		apply_port_forwards "${GUEST_IP}" "${PORT_FORWARDS}"
+		ensure_root "$@"
+		setup_tap "${TAP_DEV}"
+		# shellcheck source=../argus/lib.sh
+		. "${REPO_ROOT}/argus/lib.sh"
+		argus_load_global_policy
+		if [ "${ARGUS_ENABLED}" = "1" ]; then
+			info "applying Argus firewall and DNS"
+			argus_apply
+		else
+			enable_masquerade
+			apply_port_forwards "${GUEST_IP}" "${PORT_FORWARDS}"
+		fi
 	fi
 else
 	TAP_FOR_VM=""

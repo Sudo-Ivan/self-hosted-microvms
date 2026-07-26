@@ -213,6 +213,7 @@ Never commit live credentials from `/data` volumes or generated admin passwords.
 - deps: install host packages and Firecracker
 - run/pick: opinionated up and interactive template picker
 - migrate: Docker Compose scan and template match
+- net prepare: user-owned TAPs for NETWORK_MODE=user
 - up/create/start/stop/restart/destroy: instance lifecycle
 - clone/rename: copy or rename stopped instances
 - templates/info/validate/template new|sync: template UX

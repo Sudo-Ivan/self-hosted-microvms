@@ -114,6 +114,17 @@ else
 	maybe "argus policy missing run ./mvm setup"
 fi
 
+if mvm_net_mode_user; then
+	ok "NETWORK_MODE=user (non-root start/stop when taps are prepared)"
+	if ip link show "${BRIDGE_NAME}" >/dev/null 2>&1; then
+		ok "bridge ${BRIDGE_NAME} present"
+	else
+		maybe "bridge ${BRIDGE_NAME} missing run sudo ./mvm net prepare --host"
+	fi
+else
+	maybe "NETWORK_MODE=bridge (start/stop need root or passwordless sudo/doas)"
+fi
+
 if mvmsec_resolve >/dev/null 2>&1; then
 	ok "mvmsec ($(mvmsec_resolve))"
 	if [ -f "${SECRETS_DIR}/protect.json" ] || [ -f "${SECRETS_DIR}/vault.json.age" ]; then

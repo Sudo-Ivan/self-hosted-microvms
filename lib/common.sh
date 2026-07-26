@@ -64,6 +64,15 @@ load_config() {
 	DEFAULT_PROFILE="${DEFAULT_PROFILE:-}"
 	DETACH="${DETACH:-1}"
 	SETUP_NET="${SETUP_NET:-1}"
+	NETWORK_MODE="${NETWORK_MODE:-bridge}"
+	NET_USER="${NET_USER:-}"
+	NET_GROUP="${NET_GROUP:-}"
+	case "${NETWORK_MODE}" in
+	bridge | user) ;;
+	*)
+		die "NETWORK_MODE must be bridge or user (got ${NETWORK_MODE})"
+		;;
+	esac
 	KERNEL_PATH="${KERNEL_PATH:-${SHARED_DIR}/vmlinux}"
 	BASE_ROOTFS_PATH="${BASE_ROOTFS_PATH:-${SHARED_DIR}/base-rootfs.ext4}"
 	ARGUS_ENABLED="${ARGUS_ENABLED:-1}"
@@ -379,4 +388,27 @@ mac_from_octet() {
 
 ensure_shared() {
 	mkdir -p "${SHARED_DIR}" "${INSTANCES_DIR}"
+}
+
+mvm_net_mode_user() {
+	[ "${NETWORK_MODE:-bridge}" = "user" ]
+}
+
+net_resolve_user() {
+	if [ -n "${NET_USER:-}" ]; then
+		printf '%s\n' "${NET_USER}"
+		return 0
+	fi
+	if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
+		printf '%s\n' "${SUDO_USER}"
+		return 0
+	fi
+	if command -v logname >/dev/null 2>&1; then
+		_nu="$(logname 2>/dev/null || true)"
+		if [ -n "${_nu}" ] && [ "${_nu}" != "root" ]; then
+			printf '%s\n' "${_nu}"
+			return 0
+		fi
+	fi
+	whoami
 }

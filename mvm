@@ -45,6 +45,7 @@ Usage:
   ./mvm publish <name> --domain host.example.com [--via proxy] [--write]
   ./mvm tls <name> --domain host.example.com [--emit caddy|nginx|both] [--write]
   ./mvm migrate [dir ...]
+  ./mvm net prepare [--host] [<instance>|--all]
   ./mvm destroy <name>
   ./mvm secrets init|set|unset|list|exists|export-mmds ...
   ./mvm service install|enable|disable|list ...
@@ -132,6 +133,26 @@ publish) exec "${SCRIPTS}/publish.sh" "$@" ;;
 tls) exec "${SCRIPTS}/tls.sh" "$@" ;;
 destroy) exec "${SCRIPTS}/destroy.sh" "$@" ;;
 migrate) exec "${SCRIPTS}/migrate.sh" "$@" ;;
+net)
+	sub="${1:-}"
+	shift 2>/dev/null || :
+	case "${sub}" in
+	prepare) exec "${SCRIPTS}/net.sh" prepare "$@" ;;
+	""|-h|--help)
+		cat <<'EOF'
+User networking (NETWORK_MODE=user):
+  sudo ./mvm net prepare --host
+  sudo ./mvm net prepare <instance>
+  sudo ./mvm net prepare --all
+EOF
+		exit 0
+		;;
+	*)
+		echo "usage: ./mvm net prepare ..." >&2
+		exit 1
+		;;
+	esac
+	;;
 secrets)
 	case "${1:-}" in
 	wizard)

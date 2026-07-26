@@ -45,6 +45,8 @@ Useful knobs:
 - `ALPINE_VERSION` and `ALPINE_RELEASE` base image pins
 - `KERNEL_SERIES` preferred guest kernel series
 - `ARGUS_ENABLED` central firewall and DNS on or off
+- `NETWORK_MODE` `bridge` (default) or `user` for non-root start/stop after `net prepare`
+- `NET_USER` / `NET_GROUP` tap owner for `NETWORK_MODE=user` (default: your login user)
 
 ## 2. Build shared assets
 
@@ -127,11 +129,29 @@ You can edit `instances/<name>/config.env` before the first start if you need di
 
 ## 5. Start and stop
 
-Start needs root for TAP devices and port forwards:
+Default (`NETWORK_MODE=bridge` in `config.env`): start and stop need root for TAP devices, port forwards, and Argus.
 
 ```bash
 sudo ./mvm start myvault
 ```
+
+### User networking (optional)
+
+Set `NETWORK_MODE=user` in `config.env`. One-time host setup as root:
+
+```bash
+sudo ./mvm net prepare --host
+sudo ./mvm net prepare myvault
+```
+
+Then start and stop without sudo:
+
+```bash
+./mvm start myvault
+./mvm stop myvault
+```
+
+Re-run `sudo ./mvm net prepare <instance>` after recreating an instance. Firewall changes still need `sudo ./mvm argus apply`.
 
 Check state:
 
