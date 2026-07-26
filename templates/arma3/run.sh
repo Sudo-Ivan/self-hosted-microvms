@@ -6,6 +6,7 @@ set -eu
 if [ -f /run/secrets/env ]; then
 	# shellcheck disable=SC1091
 	set -a
+	# shellcheck disable=SC1091
 	. /run/secrets/env
 	set +a
 fi
