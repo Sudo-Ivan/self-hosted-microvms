@@ -13,6 +13,11 @@ set -eu
 . "$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)/lib/common.sh"
 load_config
 
+if [ "${1:-}" = "--pick" ]; then
+	shift
+	exec "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/pick.sh" "$@"
+fi
+
 FILTER_TAG=""
 JSON=0
 LIST_TAGS=0
@@ -33,6 +38,7 @@ Usage:
   ./mvm templates --tag=media
   ./mvm templates --json
   ./mvm templates --tags
+  ./mvm templates --pick
 EOF
 		exit 0
 		;;
@@ -71,9 +77,9 @@ if [ "${JSON}" = "1" ]; then
 		fi
 		[ "${first}" = "1" ] || echo ','
 		first=0
-		python3 - "${name}" "${TEMPLATE_DESCRIPTION}" "${TEMPLATE_MEM_MIB}" "${TEMPLATE_PORT_FORWARDS}" "${TEMPLATE_TAGS}" "${TEMPLATE_HEALTH_SCHEME}" "${TEMPLATE_HEALTH_PORT}" "${TEMPLATE_HEALTH_PATH}" <<'PY'
+		python3 - "${name}" "${TEMPLATE_DESCRIPTION}" "${TEMPLATE_MEM_MIB}" "${TEMPLATE_PORT_FORWARDS}" "${TEMPLATE_TAGS}" "${TEMPLATE_HEALTH_SCHEME}" "${TEMPLATE_HEALTH_PORT}" "${TEMPLATE_HEALTH_PATH}" "${TEMPLATE_SUGGESTED_PROFILE}" "${TEMPLATE_SECRETS_KEYS}" "${TEMPLATE_EXAMPLE_SHARE}" "${TEMPLATE_FIRST_BOOT_HINT}" <<'PY'
 import json,sys
-name,desc,mem,ports,tags,scheme,hport,hpath=sys.argv[1:9]
+name,desc,mem,ports,tags,scheme,hport,hpath,profile,secrets,share,boot=sys.argv[1:12]
 obj={
   "name": name,
   "description": desc,
@@ -81,6 +87,10 @@ obj={
   "port_forwards": ports,
   "tags": [t.strip() for t in tags.split(",") if t.strip()],
   "health": {"scheme": scheme or "http", "port": hport, "path": hpath or "/"},
+  "suggested_profile": profile or "",
+  "secrets_keys": [k.strip() for k in secrets.split(",") if k.strip()],
+  "example_share": share or "",
+  "first_boot_hint": boot or "",
 }
 print(json.dumps(obj), end="")
 PY

@@ -1,0 +1,38 @@
+{
+  "name": "fixture-stack",
+  "services": {
+    "jellyfin": {
+      "image": "jellyfin/jellyfin:latest",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/user/jellyfin/config",
+          "target": "/config"
+        },
+        {
+          "type": "bind",
+          "source": "/home/user/jellyfin/cache",
+          "target": "/cache"
+        }
+      ]
+    },
+    "unknown-app": {
+      "build": {
+        "context": "."
+      }
+    },
+    "vaultwarden": {
+      "image": "vaultwarden/server:1.32.0",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "./vw-data",
+          "target": "/data"
+        }
+      ]
+    },
+    "postgres": {
+      "image": "postgres:16-alpine"
+    }
+  }
+}

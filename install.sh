@@ -150,13 +150,9 @@ echo "install complete: ${ROOT}"
 echo
 echo "easy first guest:"
 echo "  cd ${ROOT}"
+echo "  ./mvm setup --host"
 echo "  ./mvm templates"
 echo "  ./mvm info alpine-shell"
-if command -v doas >/dev/null 2>&1; then
-	echo "  doas ./mvm up demo alpine-shell"
-else
-	echo "  sudo ./mvm up demo alpine-shell"
-fi
-echo "  ./mvm health demo"
+echo "  ./mvm run alpine-shell"
 echo
 echo "list more apps with: ./mvm templates --tag=media"

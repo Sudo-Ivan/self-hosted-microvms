@@ -36,7 +36,7 @@ cd self-hosted-microvms
 sudo ./mvm deps
 # optional: sudo ./mvm deps --with-go --with-shares
 cp -n config.example.env config.env
-./mvm setup
+./mvm setup --host
 ```
 
 Supported package families: Ubuntu/Debian, Fedora/RHEL-like, Arch.
@@ -46,6 +46,13 @@ Supported package families: Ubuntu/Debian, Fedora/RHEL-like, Arch.
 ```bash
 ./mvm templates
 ./mvm info navidrome
+./mvm run navidrome --share /home/user1/Music:/data/navidrome/music:ro
+./mvm health navidrome
+```
+
+Or name the instance yourself:
+
+```bash
 sudo ./mvm up navi navidrome --profile media --share /home/user1/Music:/data/navidrome/music:ro
 ./mvm health navi
 ```
@@ -60,7 +67,7 @@ Handy template browse:
 ./mvm templates --tag=media
 ./mvm templates --tag=debug
 ./mvm info alpine-shell
-sudo ./mvm up demo alpine-shell
+./mvm run alpine-shell
 ```
 
 ## Common commands
@@ -70,8 +77,13 @@ sudo ./mvm up demo alpine-shell
 | ./mvm doctor | Check host prerequisites |
 | ./mvm deps | Install host packages and Firecracker |
 | ./mvm setup | Fetch kernel and build base rootfs |
+| ./mvm setup --host | Setup plus doctor and config.env |
+| ./mvm setup --check | Doctor only (fast preflight) |
 | ./mvm profiles | List resource profiles |
+| ./mvm run template | Create/start with default instance name |
+| ./mvm pick | Interactive template picker (fzf or menu) |
 | ./mvm up name template | Create if needed, start, wait healthy |
+| ./mvm migrate dir | Match Docker Compose services to templates |
 | ./mvm templates | List templates (optional --tag=NAME) |
 | ./mvm info template | Ports, tags, notes, example |
 | ./mvm validate | Check template layout |
@@ -100,6 +112,7 @@ sudo ./mvm up demo alpine-shell
 | ./mvm update --kernel | Fetch a newer guest kernel |
 | ./mvm destroy name | Delete instance disks and config |
 | ./mvm secrets | Encrypted host vault, injected at start |
+| ./mvm secrets wizard name | Prompt for template secret keys |
 | ./mvm service install | Install systemd/openrc/runit/dinit units |
 | ./mvm service enable name | Enable autostart for an instance |
 | ./mvm sudoers install | Passwordless sudo for mvm |

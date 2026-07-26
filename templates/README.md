@@ -14,6 +14,10 @@ Optional:
 - `firewall.env` Argus defaults
 - `config.example` first-run app config
 - `TAGS`, `DATA_HINT`, `NOTES`, `HEALTH_SCHEME`, `HEALTH_WAIT_SECS` in manifest
+- `SUGGESTED_PROFILE` resource profile for `./mvm run` when unset in config
+- `SECRETS_KEYS` comma-separated keys for `./mvm secrets wizard`
+- `EXAMPLE_SHARE` host:guest[:ro] hint for info and migrate
+- `FIRST_BOOT_HINT` short first-start note for `./mvm info`
 
 ## Scaffold a new template
 

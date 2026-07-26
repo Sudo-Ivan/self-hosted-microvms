@@ -31,6 +31,21 @@ if [ -n "${host_port}" ]; then
 	url="${scheme}://127.0.0.1:${host_port}/"
 fi
 
+profile_line="(default)"
+if [ -n "${TEMPLATE_SUGGESTED_PROFILE}" ]; then
+	profile_line="${TEMPLATE_SUGGESTED_PROFILE}"
+fi
+
+secrets_line="none"
+if [ -n "${TEMPLATE_SECRETS_KEYS}" ]; then
+	secrets_line="${TEMPLATE_SECRETS_KEYS}"
+fi
+
+share_line="none"
+if [ -n "${TEMPLATE_EXAMPLE_SHARE}" ]; then
+	share_line="${TEMPLATE_EXAMPLE_SHARE}"
+fi
+
 cat <<EOF
 template:     ${TEMPLATE_NAME}
 description:  ${TEMPLATE_DESCRIPTION:-}
@@ -43,13 +58,22 @@ ports:        ${TEMPLATE_PORT_FORWARDS:-none}
 health:       ${scheme} :${TEMPLATE_HEALTH_PORT:-auto}${TEMPLATE_HEALTH_PATH}
 data:         ${TEMPLATE_DATA_HINT}
 packages:     ${TEMPLATE_PACKAGES:-none}
+profile:      ${profile_line}
+secrets:      ${secrets_line}
+example share:${share_line}
 path:         ${TEMPLATE_DIR}
 
-example:
-  ./mvm up ${TEMPLATE_NAME} ${TEMPLATE_NAME}
+run:
+  ./mvm run ${TEMPLATE_NAME}
   ./mvm health ${TEMPLATE_NAME}
   open ${url}
 EOF
+
+if [ -n "${TEMPLATE_FIRST_BOOT_HINT}" ]; then
+	echo
+	echo "first boot:"
+	echo "  ${TEMPLATE_FIRST_BOOT_HINT}"
+fi
 
 if [ -n "${TEMPLATE_NOTES}" ]; then
 	echo

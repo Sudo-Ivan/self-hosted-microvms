@@ -209,15 +209,17 @@ Never commit live credentials from `/data` volumes or generated admin passwords.
 
 ## Quick command map
 
-- doctor/setup: host readiness and shared assets
+- doctor/setup: host readiness and shared assets (`setup --host`, `setup --check`)
 - deps: install host packages and Firecracker
+- run/pick: opinionated up and interactive template picker
+- migrate: Docker Compose scan and template match
 - up/create/start/stop/restart/destroy: instance lifecycle
 - clone/rename: copy or rename stopped instances
 - templates/info/validate/template new|sync: template UX
 - resize: mem/vcpu/disk growth
 - update/backup/snapshot/restore/rollback: maintenance
 - publish/tls: reverse-proxy snippets or --via proxy guest
-- secrets: age vault and MMDS inject at start
+- secrets: age vault and MMDS inject at start (`secrets wizard`)
 - argus *: firewall/DNS
 - sudoers/doas: passwordless root helpers (then start/stop auto-elevate)
 - service *: host init autostart units

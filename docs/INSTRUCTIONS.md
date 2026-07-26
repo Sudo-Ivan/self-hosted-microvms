@@ -52,7 +52,12 @@ From the repo root:
 
 ```bash
 ./mvm setup
+./mvm setup --host
+./mvm setup --check
 ```
+
+`--host` also runs `./mvm doctor` and creates `config.env` when missing.
+`--check` is doctor only (no kernel or rootfs work).
 
 This downloads a Firecracker CI guest kernel and builds an Alpine-based rootfs staging tree under `shared/`.
 
@@ -69,6 +74,32 @@ To force a clean rebuild later:
 ```
 
 Choose a service name from the list. Templates are intentionally generic.
+
+Interactive picker:
+
+```bash
+./mvm pick
+./mvm pick --tag=media
+./mvm templates --pick
+```
+
+## 3b. Run with defaults
+
+```bash
+./mvm info navidrome
+./mvm run navidrome
+./mvm run navidrome --share /path/on/host:/data/navidrome/music:ro
+```
+
+`run` uses the template name as the instance name (or `template-2` if taken) and applies `SUGGESTED_PROFILE` from the manifest when set.
+
+## 3c. Migrate from Docker Compose
+
+Requires `docker compose`. Scans for compose files under a directory (depth 2), matches images to templates, lists skipped services, then asks before each `./mvm up`:
+
+```bash
+./mvm migrate ~/my-compose-stack
+```
 
 ## 4. Create an instance
 
@@ -262,6 +293,7 @@ Build the CLI once, then store secrets encrypted under `shared/secrets/` (gitign
 ```bash
 ./scripts/build-mvmsec.sh
 ./mvm secrets init
+./mvm secrets wizard navi
 ./mvm secrets set navi NAVIDROME_PASSWORD='...'
 ```
 

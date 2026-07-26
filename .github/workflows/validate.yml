@@ -23,6 +23,9 @@ jobs:
       - name: Validate template layout
         run: ./scripts/validate-templates.sh
 
+      - name: Compose migrate matcher
+        run: python3 lib/migrate/compose-match.py --test
+
       - name: POSIX shellcheck
         run: |
           sudo apt-get update

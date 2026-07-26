@@ -55,6 +55,7 @@ while read -r name; do
 	TAGS=""
 	HEALTH_SCHEME=""
 	HARDEN=""
+	unset SECRETS_KEYS SUGGESTED_PROFILE EXAMPLE_SHARE FIRST_BOOT_HINT
 	# shellcheck disable=SC1090
 	set -a
 	# shellcheck disable=SC1091
@@ -68,6 +69,21 @@ while read -r name; do
 	http|https) ;;
 	*) bad "${name}: HEALTH_SCHEME must be http or https" ;;
 	esac
+
+	if [ -n "${SECRETS_KEYS:-}" ]; then
+		_sk_old_ifs=${IFS}
+		IFS=,
+		for _sk in ${SECRETS_KEYS}; do
+			IFS=${_sk_old_ifs}
+			_sk="$(echo "${_sk}" | tr -d '[:space:]')"
+			[ -n "${_sk}" ] || continue
+			if ! grep -qF "${_sk}" "${dir}/run.sh" 2>/dev/null; then
+				bad "${name}: SECRETS_KEYS contains ${_sk} not referenced in run.sh"
+			fi
+			IFS=,
+		done
+		IFS=${_sk_old_ifs}
+	fi
 
 	case "${HARDEN:-setpriv}" in
 	setpriv|user|caps|bwrap|bubblewrap|off|0|no|false|"") ;;

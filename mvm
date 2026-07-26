@@ -14,8 +14,10 @@ usage() {
 Usage:
   ./mvm doctor
   ./mvm deps [--with-go] [--with-shares] [--skip-firecracker]
-  ./mvm setup
+  ./mvm setup [--host] [--check] [--rebuild]
   ./mvm profiles
+  ./mvm run <template> [--profile name] [--share host:guest] [--mem N]
+  ./mvm pick [--tag=NAME]
   ./mvm up <name> <template> [--profile name] [--share host:guest] [--mem N]
   ./mvm templates [--tag=NAME] [--json] [--tags]
   ./mvm info <template>
@@ -42,6 +44,7 @@ Usage:
   ./mvm watchdog [--once] [name]
   ./mvm publish <name> --domain host.example.com [--via proxy] [--write]
   ./mvm tls <name> --domain host.example.com [--emit caddy|nginx|both] [--write]
+  ./mvm migrate [dir ...]
   ./mvm destroy <name>
   ./mvm secrets init|set|unset|list|exists|export-mmds ...
   ./mvm service install|enable|disable|list ...
@@ -53,7 +56,8 @@ Examples:
   curl -fsSL https://raw.githubusercontent.com/Sudo-Ivan/self-hosted-microvms/master/install.sh | sh
   ./mvm deps --with-go
   ./mvm up navi navidrome --profile media --share /home/user/Music:/data/navidrome/music:ro
-  ./mvm templates --tag=media
+  ./mvm run navidrome --share /home/user/Music:/data/navidrome/music:ro
+  ./mvm pick --tag=media
   ./mvm info navidrome
   ./mvm template new myapp --port 8080 --tag tools
   ./mvm resize navi --mem 1024 --vcpu 2 --restart
@@ -71,6 +75,8 @@ doctor) exec "${SCRIPTS}/doctor.sh" "$@" ;;
 deps|install-deps) exec "${SCRIPTS}/install-deps.sh" "$@" ;;
 setup) exec "${SCRIPTS}/setup.sh" "$@" ;;
 profiles) exec "${SCRIPTS}/profiles.sh" "$@" ;;
+run) exec "${SCRIPTS}/run.sh" "$@" ;;
+pick) exec "${SCRIPTS}/pick.sh" "$@" ;;
 up) exec "${SCRIPTS}/up.sh" "$@" ;;
 templates) exec "${SCRIPTS}/templates.sh" "$@" ;;
 info) exec "${SCRIPTS}/info.sh" "$@" ;;
@@ -125,12 +131,18 @@ watchdog) exec "${SCRIPTS}/watchdog.sh" "$@" ;;
 publish) exec "${SCRIPTS}/publish.sh" "$@" ;;
 tls) exec "${SCRIPTS}/tls.sh" "$@" ;;
 destroy) exec "${SCRIPTS}/destroy.sh" "$@" ;;
+migrate) exec "${SCRIPTS}/migrate.sh" "$@" ;;
 secrets)
 	case "${1:-}" in
+	wizard)
+		shift
+		exec "${SCRIPTS}/secrets-wizard.sh" "$@"
+		;;
 	""|-h|--help)
 		cat <<'EOF'
 Host secrets vault (age encrypted, delivered via MMDS at start):
   ./mvm secrets init [--force] [--passphrase] [--tpm] [--no-tpm]
+  ./mvm secrets wizard <instance>
   ./mvm secrets protect status
   ./mvm secrets set <instance> KEY=VALUE... [--env-file FILE]
   ./mvm secrets unset <instance> KEY
