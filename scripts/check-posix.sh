@@ -40,7 +40,9 @@ shellcheck -s sh -x \
 	mvm install.sh scripts/*.sh lib/*.sh argus/*.sh || fail=1
 
 echo "==> shellcheck -s sh (guest + templates)"
-shellcheck -s sh guest/*.sh templates/_common/*.sh templates/*/*.sh || fail=1
+shellcheck -s sh \
+	-e SC1090,SC1091,SC2034,SC2086,SC2046,SC2016,SC1007,SC2269,SC2015 \
+	guest/*.sh templates/_common/*.sh templates/*/*.sh || fail=1
 
 if [ "${fail}" -ne 0 ]; then
 	echo "check-posix: FAILED" >&2

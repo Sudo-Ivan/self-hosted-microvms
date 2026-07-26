@@ -27,10 +27,7 @@ jobs:
         run: python3 lib/migrate/compose-match.py --test
 
       - name: POSIX shellcheck
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y shellcheck dash bubblewrap
-          ./scripts/check-posix.sh
+        run: ./scripts/ci-posix.sh
 
       - name: Harden smoke
         run: sudo ./scripts/test-harden.sh
@@ -52,8 +49,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
-          check-latest: true
+          go-version-file: go.mod
           cache-dependency-path: go.sum
 
       - name: go fmt
