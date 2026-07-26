@@ -1,0 +1,31 @@
+# Copy to instance secrets or export before start. Required for install/update:
+# STEAM_USER=your_steam_login
+# STEAM_PASSWORD=your_steam_password
+
+ARMA_BINARY=./arma3server_x64
+ARMA_CONFIG=main.cfg
+ARMA_PARAMS=
+ARMA_PROFILE=main
+ARMA_WORLD=empty
+ARMA_LIMITFPS=100
+ARMA_CDLC=
+PORT=2302
+
+MODS_LOCAL=true
+MODS_PRESET=
+# MODS_PRESET=https://example.com/modlist.html
+# MODS_PRESET=/data/arma3/presets/mods.html
+
+HEADLESS_CLIENTS=0
+HEADLESS_CLIENTS_PROFILE=$profile-hc-$i
+
+SKIP_INSTALL=false
+CLEAR_KEYS=true
+
+ARMA_DOWNLOAD_MAX_WORKERS=4
+ARMA_DOWNLOAD_CHUNK_SIZE=4194304
+ARMA_DOWNLOAD_PROGRESS_INTERVAL=60
+ARMA_CDN_CLIENT_RETRIES=3
+ARMA_CDN_CLIENT_BASE_DELAY=1.5
+ARMA_CDN_OP_RETRIES=3
+ARMA_CDN_OP_BASE_DELAY=1.5

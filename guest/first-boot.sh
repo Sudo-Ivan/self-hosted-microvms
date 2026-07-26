@@ -17,7 +17,20 @@ fi
 
 if [ -f /etc/apk/repositories ]; then
 	echo "updating apk indexes"
-	apk update
+	_apk_try=0
+	_apk_ok=0
+	while [ "${_apk_try}" -lt 5 ]; do
+		if apk update; then
+			_apk_ok=1
+			break
+		fi
+		_apk_try=$((_apk_try + 1))
+		echo "apk update failed (attempt ${_apk_try}/5)" >&2
+		sleep $((_apk_try * 3))
+	done
+	if [ "${_apk_ok}" -eq 0 ]; then
+		echo "apk update failed after retries, continuing with existing indexes" >&2
+	fi
 fi
 
 if [ -f "${TEMPLATE_DIR}/manifest.env" ]; then
